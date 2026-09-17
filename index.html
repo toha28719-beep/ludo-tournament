@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Ludo Pro Tournament</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0a0e17',
+              card: '#121826',
+              border: '#1e293b',
+              neon: '#10b981',
+              gold: '#f59e0b',
+              accent: '#6366f1'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            gaming: ['Rajdhani', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* Mobile-first viewport locking & smooth scrollbars */
+    body {
+      background-color: #05070d;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .neon-border {
+      box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.2);
+    }
+    .neon-gold-border {
+      box-shadow: 0 0 15px -3px rgba(245, 158, 11, 0.25);
+    }
+  </style>
+</head>
+<body class="text-slate-100 flex justify-center items-center min-h-screen">
+
+  <!-- ================= APP CONTAINER ================= -->
+  <div id="appContainer" class="w-full h-screen max-w-md bg-brand-dark flex flex-col relative overflow-hidden sm:h-[880px] sm:rounded-3xl sm:border sm:border-brand-border sm:shadow-2xl">
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="absolute top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="absolute inset-0 bg-brand-dark/90 backdrop-blur-md z-40 flex flex-col items-center justify-center transition-opacity duration-300">
+      <div class="relative w-16 h-16">
+        <div class="absolute inset-0 rounded-full border-4 border-emerald-500/20"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+      </div>
+      <p class="mt-4 text-xs font-semibold tracking-wider uppercase text-emerald-400 font-gaming">Authenticating Security Engine...</p>
+    </div>
+
+    <!-- ================= 1. AUTHENTICATION SCREENS ================= -->
+    <div id="authScreen" class="flex-1 flex flex-col p-6 justify-center overflow-y-auto custom-scrollbar hidden">
+      <!-- Brand Logo Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex p-3 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-indigo-500/10 border border-emerald-500/30 mb-3 neon-border">
+          <i class="fa-solid fa-dice-d20 text-3xl text-emerald-400"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-wider font-gaming uppercase bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent">Ludo Pro Arena</h1>
+        <p class="text-xs text-slate-400 mt-1">High-Security Esports Tournament Platform</p>
+      </div>
+
+      <!-- Auth Switch Tabs -->
+      <div class="flex bg-brand-card p-1 rounded-xl border border-brand-border mb-6">
+        <button id="tabLoginBtn" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-emerald-500 text-slate-950 font-gaming tracking-wide">SIGN IN</button>
+        <button id="tabRegisterBtn" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white font-gaming tracking-wide">REGISTER</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-envelope"></i></span>
+            <input type="email" id="loginEmail" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-colors" placeholder="player@domain.com">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-lock"></i></span>
+            <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-colors" placeholder="••••••••">
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="button" id="forgotPassTrigger" class="text-xs text-emerald-400 hover:text-emerald-300 font-medium">Forgot Password?</button>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl font-bold font-gaming tracking-wider text-slate-950 uppercase shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-transform">
+          Access Arena
+        </button>
+      </form>
+
+      <!-- REGISTRATION FORM -->
+      <form id="registerForm" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Full Name / In-Game Name</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-user"></i></span>
+            <input type="text" id="regName" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500" placeholder="LudoKing_99">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-envelope"></i></span>
+            <input type="email" id="regEmail" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500" placeholder="player@domain.com">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Phone Number (bKash / Nagad)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-phone"></i></span>
+            <input type="tel" id="regPhone" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500" placeholder="+8801XXXXXXXXX">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-key"></i></span>
+            <input type="password" id="regPassword" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500" placeholder="Min. 6 chars (letters & numbers)">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Confirm Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-shield-halved"></i></span>
+            <input type="password" id="regConfirmPassword" required class="w-full pl-10 pr-4 py-2.5 bg-brand-card border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500" placeholder="Repeat password">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 mt-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl font-bold font-gaming tracking-wider text-slate-950 uppercase shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-transform">
+          Create Account
+        </button>
+      </form>
+    </div>
+
+    <!-- ================= 2. FORGOT PASSWORD MODAL ================= -->
+    <div id="forgotPasswordModal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 hidden">
+      <div class="bg-brand-card border border-brand-border w-full max-w-sm rounded-2xl p-5 shadow-2xl relative">
+        <button id="closeForgotModal" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+        <div class="text-center mb-4">
+          <i class="fa-solid fa-lock-rotate text-3xl text-emerald-400 mb-2"></i>
+          <h3 class="text-lg font-bold font-gaming uppercase tracking-wide">Recover Password</h3>
+          <p class="text-xs text-slate-400 mt-1">Enter your registered email to receive a password recovery link.</p>
+        </div>
+        <form id="forgotPasswordForm" class="space-y-4">
+          <div>
+            <input type="email" id="resetEmail" required class="w-full px-4 py-2.5 bg-brand-dark border border-brand-border rounded-xl text-sm focus:outline-none focus:border-emerald-500" placeholder="player@domain.com">
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-500 text-slate-950 font-bold font-gaming tracking-wide uppercase rounded-xl hover:bg-emerald-400 transition-colors">
+            Send Reset Link
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================= 3. MAIN APPLICATION DASHBOARD ================= -->
+    <div id="mainDashboard" class="flex-1 flex flex-col h-full hidden">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="px-4 py-3 bg-brand-card/90 backdrop-blur border-b border-brand-border flex items-center justify-between z-10 shrink-0">
+        <!-- Brand Info -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-dice text-slate-950 text-lg"></i>
+          </div>
+          <div>
+            <div class="text-sm font-black tracking-wider uppercase font-gaming bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">Ludo Pro</div>
+            <div class="text-[10px] text-slate-400 leading-none truncate max-w-[90px]" id="headerUserName">Player</div>
+          </div>
+        </div>
+
+        <!-- Wallet Badge -->
+        <div class="flex items-center gap-2">
+          <div class="bg-brand-dark border border-amber-500/30 rounded-xl px-3 py-1 flex items-center gap-2 neon-gold-border">
+            <i class="fa-solid fa-wallet text-amber-400 text-xs"></i>
+            <span class="text-xs font-bold font-gaming tracking-wide text-amber-300" id="headerBalance">৳ 0.00</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- SCROLLABLE TAB CONTENT -->
+      <main class="flex-1 overflow-y-auto custom-scrollbar p-4 relative pb-20">
+        
+        <!-- VIEW: TOURNAMENTS (DEFAULT) -->
+        <section id="viewTournaments" class="space-y-4">
+          <!-- Banner -->
+          <div class="relative rounded-2xl overflow-hidden p-4 bg-gradient-to-r from-indigo-900/60 to-brand-card border border-indigo-500/20">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live Season 1</span>
+            <h2 class="text-xl font-bold font-gaming uppercase mt-2">Championship Arena</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Win up to ৳ 10,000 in real-time matchups!</p>
+          </div>
+
+          <!-- Tournament Categories Filter -->
+          <div class="flex gap-2 overflow-x-auto custom-scrollbar pb-1">
+            <button class="px-3 py-1.5 bg-emerald-500 text-slate-950 rounded-lg text-xs font-bold whitespace-nowrap">All Matches</button>
+            <button class="px-3 py-1.5 bg-brand-card border border-brand-border text-slate-300 rounded-lg text-xs font-bold whitespace-nowrap">1 vs 1 Battle</button>
+            <button class="px-3 py-1.5 bg-brand-card border border-brand-border text-slate-300 rounded-lg text-xs font-bold whitespace-nowrap">4 Players Grand</button>
+          </div>
+
+          <!-- Placeholder Tournament Cards -->
+          <div class="space-y-3">
+            <!-- Card 1 -->
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-4 transition-all">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h4 class="font-bold text-sm text-slate-200">Dhaka Premier 1v1 #104</h4>
+                  <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                    <span><i class="fa-solid fa-gamepad text-emerald-400 mr-1"></i>Classic Mode</span>
+                    <span>•</span>
+                    <span><i class="fa-solid fa-users text-indigo-400 mr-1"></i>1 / 2 Joined</span>
+                  </div>
+                </div>
+                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase">Open</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 bg-brand-dark/60 p-2.5 rounded-xl mb-3 border border-brand-border">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase">Entry Fee</span>
+                  <p class="text-xs font-bold text-slate-200">৳ 50.00</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase">Prize Pool</span>
+                  <p class="text-xs font-bold text-amber-400">৳ 90.00</p>
+                </div>
+              </div>
+
+              <button class="w-full py-2 bg-brand-border hover:bg-emerald-500 hover:text-slate-950 font-gaming uppercase tracking-wider font-bold text-xs rounded-xl transition-all">
+                Join Match
+              </button>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-4 transition-all">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h4 class="font-bold text-sm text-slate-200">Elite 4-Player Knockout #42</h4>
+                  <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                    <span><i class="fa-solid fa-gamepad text-emerald-400 mr-1"></i>Quick Mode</span>
+                    <span>•</span>
+                    <span><i class="fa-solid fa-users text-indigo-400 mr-1"></i>3 / 4 Joined</span>
+                  </div>
+                </div>
+                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase">Filling Fast</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 bg-brand-dark/60 p-2.5 rounded-xl mb-3 border border-brand-border">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase">Entry Fee</span>
+                  <p class="text-xs font-bold text-slate-200">৳ 100.00</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase">Prize Pool</span>
+                  <p class="text-xs font-bold text-amber-400">৳ 360.00</p>
+                </div>
+              </div>
+
+              <button class="w-full py-2 bg-brand-border hover:bg-emerald-500 hover:text-slate-950 font-gaming uppercase tracking-wider font-bold text-xs rounded-xl transition-all">
+                Join Match
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: MY MATCHES -->
+        <section id="viewMatches" class="space-y-4 hidden">
+          <h3 class="text-lg font-bold font-gaming uppercase tracking-wide">My Registered Matches</h3>
+          <div class="p-8 text-center bg-brand-card border border-brand-border rounded-2xl">
+            <i class="fa-solid fa-dice-five text-4xl text-slate-600 mb-2"></i>
+            <p class="text-sm font-semibold text-slate-300">No active matches found</p>
+            <p class="text-xs text-slate-500 mt-1">Join an open tournament room from the arena tab to play.</p>
+          </div>
+        </section>
+
+        <!-- VIEW: WALLET -->
+        <section id="viewWallet" class="space-y-4 hidden">
+          <div class="bg-gradient-to-br from-brand-card to-slate-900 border border-brand-border p-5 rounded-2xl relative overflow-hidden">
+            <div class="text-xs text-slate-400 font-medium">Available Balance</div>
+            <div class="text-3xl font-extrabold text-amber-400 font-gaming mt-1" id="walletTabBalance">৳ 0.00</div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2.5 bg-emerald-500 text-slate-950 font-bold font-gaming uppercase text-xs rounded-xl flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-plus-circle"></i> Add Funds
+              </button>
+              <button class="flex-1 py-2.5 bg-brand-border text-slate-200 hover:text-white font-bold font-gaming uppercase text-xs rounded-xl flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-arrow-down-to-bracket"></i> Withdraw
+              </button>
+            </div>
+          </div>
+
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Transaction History</h4>
+          <div class="bg-brand-card border border-brand-border rounded-2xl p-4 text-center text-xs text-slate-500">
+            No recent deposits or cash-outs recorded.
+          </div>
+        </section>
+
+        <!-- VIEW: PROFILE -->
+        <section id="viewProfile" class="space-y-4 hidden">
+          <div class="bg-brand-card border border-brand-border rounded-2xl p-5 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center text-2xl font-black text-slate-950 font-gaming" id="profileAvatar">
+              P
+            </div>
+            <div class="overflow-hidden">
+              <h3 class="font-bold text-base text-slate-100 truncate" id="profileName">Player Name</h3>
+              <p class="text-xs text-slate-400 truncate" id="profileEmail">user@email.com</p>
+              <p class="text-xs text-slate-400 truncate" id="profilePhone">+8801XXXXXXXXX</p>
+            </div>
+          </div>
+
+          <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden divide-y divide-brand-border text-xs">
+            <div class="p-3.5 flex justify-between items-center">
+              <span class="text-slate-400">Account Type</span>
+              <span class="font-bold text-emerald-400 uppercase font-gaming">Player Verified</span>
+            </div>
+            <div class="p-3.5 flex justify-between items-center">
+              <span class="text-slate-400">Security Architecture</span>
+              <span class="font-bold text-indigo-400">Firebase Auth v10</span>
+            </div>
+          </div>
+
+          <button id="logoutBtn" class="w-full py-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold font-gaming uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 transition-colors">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Terminate Session
+          </button>
+        </section>
+
+      </main>
+
+      <!-- BOTTOM NAVIGATION BAR (PWA Native App Style) -->
+      <nav class="absolute bottom-0 inset-x-0 bg-brand-card/95 backdrop-blur-md border-t border-brand-border px-4 py-2 flex justify-around items-center z-20">
+        <button data-target="viewTournaments" class="nav-item flex flex-col items-center gap-1 text-emerald-400 transition-colors">
+          <i class="fa-solid fa-trophy text-sm"></i>
+          <span class="text-[10px] font-bold font-gaming uppercase tracking-wider">Lobbies</span>
+        </button>
+        <button data-target="viewMatches" class="nav-item flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition-colors">
+          <i class="fa-solid fa-gamepad text-sm"></i>
+          <span class="text-[10px] font-bold font-gaming uppercase tracking-wider">Matches</span>
+        </button>
+        <button data-target="viewWallet" class="nav-item flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition-colors">
+          <i class="fa-solid fa-wallet text-sm"></i>
+          <span class="text-[10px] font-bold font-gaming uppercase tracking-wider">Wallet</span>
+        </button>
+        <button data-target="viewProfile" class="nav-item flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition-colors">
+          <i class="fa-solid fa-user-shield text-sm"></i>
+          <span class="text-[10px] font-bold font-gaming uppercase tracking-wider">Profile</span>
+        </button>
+      </nav>
+
+    </div>
+  </div>
+
+  <!-- ================= FIREBASE APPLICATION LOGIC ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      sendPasswordResetEmail,
+      setPersistence,
+      browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      onSnapshot, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- Firebase Production Configuration ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUXYAa5zhNgAQb0rZXoMkA4U4NgxFfxx8",
+      authDomain: "ludo-tournament-2b6f4.firebaseapp.com",
+      databaseURL: "https://ludo-tournament-2b6f4-default-rtdb.firebaseio.com",
+      projectId: "ludo-tournament-2b6f4",
+      storageBucket: "ludo-tournament-2b6f4.firebasestorage.app",
+      messagingSenderId: "542615054488",
+      appId: "1:542615054488:web:1779d7eb9f24da1c7048ed",
+      measurementId: "G-LW578PXMHE"
+    };
+
+    // Initialize Services
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Enforce Local Persistence (Keep user session secure on mobile PWA)
+    setPersistence(auth, browserLocalPersistence).catch(err => console.error("Persistence error:", err));
+
+    let unsubscribeUserDoc = null;
+
+    // --- Toast Notification Engine ---
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const colors = {
+        success: 'bg-emerald-500 text-slate-950 border-emerald-400',
+        error: 'bg-rose-600 text-white border-rose-500',
+        info: 'bg-indigo-600 text-white border-indigo-500'
+      };
+
+      toast.className = `px-4 py-2.5 rounded-xl border text-xs font-bold shadow-lg pointer-events-auto transform transition-all duration-300 translate-y-[-10px] opacity-0 ${colors[type] || colors.info}`;
+      toast.textContent = message;
+
+      container.appendChild(toast);
+      
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- Loading Overlay Controller ---
+    function toggleLoader(show) {
+      const loader = document.getElementById('loadingOverlay');
+      if (show) {
+        loader.classList.remove('hidden', 'opacity-0');
+      } else {
+        loader.classList.add('opacity-0');
+        setTimeout(() => loader.classList.add('hidden'), 300);
+      }
+    }
+
+    // --- Input Validation Helpers ---
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function isValidPassword(password) {
+      // Minimum 6 characters, must contain at least one letter and one number
+      return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/.test(password);
+    }
+
+    function isValidPhone(phone) {
+      // Allows optional leading +, then digits between 10 and 15
+      return /^\+?[0-9]{10,15}$/.test(phone.trim());
+    }
+
+    // --- Auth Tab Switching ---
+    const tabLoginBtn = document.getElementById('tabLoginBtn');
+    const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    tabLoginBtn.addEventListener('click', () => {
+      tabLoginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-emerald-500 text-slate-950 font-gaming tracking-wide";
+      tabRegisterBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white font-gaming tracking-wide";
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+    });
+
+    tabRegisterBtn.addEventListener('click', () => {
+      tabRegisterBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-emerald-500 text-slate-950 font-gaming tracking-wide";
+      tabLoginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white font-gaming tracking-wide";
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+    });
+
+    // --- Registration Handler ---
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+      if (!isValidEmail(email)) {
+        return showToast("Please provide a valid email format.", "error");
+      }
+
+      if (!isValidPhone(phone)) {
+        return showToast("Please provide a valid contact number.", "error");
+      }
+
+      if (!isValidPassword(password)) {
+        return showToast("Password requires minimum 6 characters with letters and numbers.", "error");
+      }
+
+      if (password !== confirmPassword) {
+        return showToast("Password confirmation mismatch.", "error");
+      }
+
+      toggleLoader(true);
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        // Initialize Firestore User Document
+        // Notice: walletBalance is created locally with 0 and must be verified by Firestore security rules on the backend
+        await setDoc(doc(db, "users", uid), {
+          uid: uid,
+          name: name,
+          email: email,
+          phone: phone,
+          role: "player",
+          isBanned: false,
+          walletBalance: 0,
+          createdAt: serverTimestamp()
+        });
+
+        showToast("Registration successful! Welcome to the Arena.", "success");
+        registerForm.reset();
+      } catch (err) {
+        console.error("Register Error:", err);
+        // Sanitized security response (Prevent enumeration where applicable)
+        if (err.code === "auth/email-already-in-use") {
+          showToast("Email address is already in use.", "error");
+        } else {
+          showToast("Failed to initialize player account. Please retry.", "error");
+        }
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // --- Login Handler ---
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!isValidEmail(email)) {
+        return showToast("Please input a valid email.", "error");
+      }
+
+      toggleLoader(true);
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast("Identity verified. Entering arena...", "success");
+        loginForm.reset();
+      } catch (err) {
+        console.error("Login Security Audit:", err.code);
+        // Sanitized generic authentication failure to defeat credential harvesting
+        showToast("Invalid email or password.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // --- Forgot Password Modal & Action ---
+    const forgotModal = document.getElementById('forgotPasswordModal');
+    document.getElementById('forgotPassTrigger').addEventListener('click', () => {
+      forgotModal.classList.remove('hidden');
+    });
+    document.getElementById('closeForgotModal').addEventListener('click', () => {
+      forgotModal.classList.add('hidden');
+    });
+
+    document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resetEmail = document.getElementById('resetEmail').value.trim();
+
+      if (!isValidEmail(resetEmail)) {
+        return showToast("Provide a valid email address.", "error");
+      }
+
+      toggleLoader(true);
+      try {
+        await sendPasswordResetEmail(auth, resetEmail);
+        forgotModal.classList.add('hidden');
+        document.getElementById('forgotPasswordForm').reset();
+        showToast("Password reset instructions sent to your email.", "success");
+      } catch (err) {
+        console.error("Password reset error:", err);
+        // Provide standard feedback without leaking email existence
+        forgotModal.classList.add('hidden');
+        showToast("If that email is registered, a reset link has been dispatched.", "info");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // --- Logout Action ---
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      toggleLoader(true);
+      try {
+        if (unsubscribeUserDoc) unsubscribeUserDoc();
+        await signOut(auth);
+        showToast("Session safely terminated.", "info");
+      } catch (err) {
+        showToast("Logout failure.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // --- Main Auth Observer & Real-time Profile Synchronization ---
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User Authenticated
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('mainDashboard').classList.remove('hidden');
+
+        // Attach Real-Time Firestore Listener for Live Balance & Bans
+        if (unsubscribeUserDoc) unsubscribeUserDoc();
+
+        const userDocRef = doc(db, "users", user.uid);
+        unsubscribeUserDoc = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+
+            // Zero-trust verification: Terminate immediately if user is marked banned
+            if (data.isBanned === true) {
+              signOut(auth);
+              showToast("Account access has been revoked by administrators.", "error");
+              return;
+            }
+
+            // Bind values safely to UI (Preventing DOM-based XSS via textContent)
+            const displayName = data.name || "Player";
+            const balanceFormatted = `৳ ${(Number(data.walletBalance) || 0).toFixed(2)}`;
+
+            document.getElementById('headerUserName').textContent = displayName;
+            document.getElementById('profileName').textContent = displayName;
+            document.getElementById('profileEmail').textContent = data.email || user.email;
+            document.getElementById('profilePhone').textContent = data.phone || "Not Set";
+            document.getElementById('profileAvatar').textContent = displayName.charAt(0).toUpperCase();
+
+            // Real-time Balance Badges
+            document.getElementById('headerBalance').textContent = balanceFormatted;
+            document.getElementById('walletTabBalance').textContent = balanceFormatted;
+          }
+        }, (error) => {
+          console.error("Firestore user doc sync failed:", error);
+        });
+
+      } else {
+        // User Not Authenticated
+        if (unsubscribeUserDoc) {
+          unsubscribeUserDoc();
+          unsubscribeUserDoc = null;
+        }
+        document.getElementById('mainDashboard').classList.add('hidden');
+        document.getElementById('authScreen').classList.remove('hidden');
+      }
+      toggleLoader(false);
+    });
+
+    // --- Native App Bottom Navigation Engine ---
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = {
+      viewTournaments: document.getElementById('viewTournaments'),
+      viewMatches: document.getElementById('viewMatches'),
+      viewWallet: document.getElementById('viewWallet'),
+      viewProfile: document.getElementById('viewProfile')
+    };
+
+    navItems.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetId = button.getAttribute('data-target');
+
+        // Hide all views
+        Object.values(sections).forEach(sec => sec.classList.add('hidden'));
+        
+        // Show target view
+        if (sections[targetId]) {
+          sections[targetId].classList.remove('hidden');
+        }
+
+        // Reset nav styles
+        navItems.forEach(btn => {
+          btn.classList.remove('text-emerald-400');
+          btn.classList.add('text-slate-400');
+        });
+
+        // Activate clicked item
+        button.classList.add('text-emerald-400');
+        button.classList.remove('text-slate-400');
+      });
+    });
+
+  </script>
+</body>
+</html>
