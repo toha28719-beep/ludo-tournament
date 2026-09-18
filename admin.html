@@ -1,0 +1,1612 @@
+# ludo-tournament<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LUDO ARENA | Enterprise Super Admin</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            admin: {
+              void: '#070a13',
+              base: '#0b0f19',
+              card: '#111827',
+              border: '#1f293d',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              violet: '#8b5cf6',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            gaming: ['Rajdhani', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & FontAwesome 6 Pro CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #070a13;
+      font-family: 'Outfit', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glow-border-cyan { box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.35); }
+    .glow-border-emerald { box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.35); }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col bg-admin-void">
+
+  <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- ================= GLOBAL LOADER ================= -->
+  <div id="globalLoader" class="fixed inset-0 bg-admin-void/90 backdrop-blur-md z-[9998] flex flex-col items-center justify-center transition-opacity duration-300">
+    <div class="relative w-16 h-16">
+      <div class="absolute inset-0 rounded-full border-4 border-admin-cyan/20"></div>
+      <div class="absolute inset-0 rounded-full border-4 border-admin-cyan border-t-transparent animate-spin"></div>
+    </div>
+    <p class="mt-4 text-xs font-bold tracking-widest uppercase text-admin-cyan font-gaming">Authenticating Super Admin...</p>
+  </div>
+
+  <!-- ================= 1. ADMIN LOGIN VIEW ================= -->
+  <div id="adminAuthView" class="min-h-screen flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 sm:p-8 border border-admin-border shadow-2xl relative">
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3.5 rounded-2xl bg-admin-cyan/10 border border-admin-cyan/30 mb-3 text-admin-cyan text-2xl glow-border-cyan">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h1 class="text-2xl font-black font-gaming tracking-wider uppercase text-white">Super Admin Portal</h1>
+        <p class="text-xs text-slate-400 mt-1">Ludo Pro Tournament Enterprise Master Control</p>
+      </div>
+
+      <form id="adminLoginForm" class="space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Admin Email</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500"><i class="fa-solid fa-envelope"></i></span>
+            <input type="email" id="adminEmailInput" required class="w-full pl-10 pr-4 py-3 bg-admin-base border border-admin-border rounded-xl text-sm focus:outline-none focus:border-admin-cyan transition-colors" placeholder="admin@domain.com">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Master Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500"><i class="fa-solid fa-lock"></i></span>
+            <input type="password" id="adminPasswordInput" required class="w-full pl-10 pr-11 py-3 bg-admin-base border border-admin-border rounded-xl text-sm focus:outline-none focus:border-admin-cyan transition-colors" placeholder="••••••••">
+            <button type="button" id="toggleLoginPasswordBtn" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-admin-cyan">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-admin-cyan via-teal-500 to-admin-emerald text-slate-950 font-black font-gaming tracking-wider uppercase rounded-xl shadow-lg glow-border-cyan hover:opacity-95 active:scale-95 transition-all text-xs">
+          Verify Super Admin Access
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 2. MAIN ADMIN DASHBOARD INTERFACE ================= -->
+  <div id="adminDashboardView" class="min-h-screen flex flex-col md:flex-row flex-1 hidden">
+
+    <!-- SIDEBAR NAVIGATION (Desktop & Drawer Mobile) -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-admin-card border-r border-admin-border z-40 flex flex-col justify-between transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+      <div>
+        <!-- Brand Header -->
+        <div class="p-5 border-b border-admin-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-admin-cyan to-admin-emerald flex items-center justify-center text-slate-950 text-base font-bold">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <h2 class="font-gaming font-black tracking-wider uppercase text-sm text-white">Super Admin</h2>
+              <span class="text-[10px] text-admin-emerald font-bold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-admin-emerald animate-pulse"></span> Root Authority
+              </span>
+            </div>
+          </div>
+          <!-- Close button on mobile -->
+          <button id="closeMobileSidebarBtn" class="md:hidden text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="p-3 space-y-1.5">
+          <button data-tab="analyticsTab" class="nav-link active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider transition-all bg-admin-cyan/20 text-admin-cyan border border-admin-cyan/30">
+            <i class="fa-solid fa-chart-line text-sm"></i> Financial Analytics
+          </button>
+          <button data-tab="financeTab" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all">
+            <i class="fa-solid fa-money-bill-transfer text-sm"></i> Deposits & Withdraws
+            <span id="pendingBadge" class="ml-auto px-1.5 py-0.5 rounded-full text-[9px] bg-admin-rose text-white font-sans hidden">0</span>
+          </button>
+          <button data-tab="usersTab" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all">
+            <i class="fa-solid fa-users-gear text-sm"></i> User & Wallet Control
+          </button>
+          <button data-tab="gamesTab" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all">
+            <i class="fa-solid fa-dice-d20 text-sm"></i> Dynamic Game Manager
+          </button>
+          <button data-tab="bannersTab" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all">
+            <i class="fa-solid fa-images text-sm"></i> Banner Slider Manager
+          </button>
+          <button data-tab="settingsTab" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all">
+            <i class="fa-solid fa-sliders text-sm"></i> Global App Settings
+          </button>
+        </nav>
+      </div>
+
+      <!-- Admin Profile & Logout Footer -->
+      <div class="p-4 border-t border-admin-border bg-admin-base/50">
+        <div class="flex items-center justify-between">
+          <div class="overflow-hidden">
+            <p id="adminUserEmailDisplay" class="text-xs font-bold text-slate-300 truncate">admin@root</p>
+            <span class="text-[10px] text-slate-500">Security Layer Active</span>
+          </div>
+          <button id="adminLogoutBtn" class="w-8 h-8 rounded-xl bg-admin-rose/10 hover:bg-admin-rose/20 text-admin-rose flex items-center justify-center text-xs transition-colors" title="Terminate Admin Session">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden hidden"></div>
+
+    <!-- MAIN ADMIN CONTENT REGION -->
+    <div class="flex-1 flex flex-col overflow-y-auto no-scrollbar min-w-0">
+
+      <!-- TOP NAV MOBILE BAR -->
+      <header class="px-4 py-3 bg-admin-card/90 backdrop-blur border-b border-admin-border flex items-center justify-between md:hidden shrink-0 sticky top-0 z-20">
+        <button id="openMobileSidebarBtn" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="font-gaming font-bold uppercase text-sm tracking-wider bg-gradient-to-r from-admin-cyan to-admin-emerald bg-clip-text text-transparent">Ludo Super Admin</span>
+        <button id="quickReloadBtn" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center">
+          <i class="fa-solid fa-arrows-rotate text-xs"></i>
+        </button>
+      </header>
+
+      <!-- TAB VIEW CONTAINERS -->
+      <main class="p-4 sm:p-6 space-y-6 flex-1 max-w-7xl mx-auto w-full">
+
+        <!-- ================= TAB 1: FINANCIAL ANALYTICS & PROFIT ================= -->
+        <section id="analyticsTab" class="tab-pane space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h2 class="text-xl font-black font-gaming uppercase tracking-wider text-white">Financial & Platform Metrics</h2>
+              <p class="text-xs text-slate-400">Live transaction metrics and algorithmic platform commission calculator</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-admin-emerald animate-ping"></span>
+              <span class="text-xs text-admin-emerald font-bold font-gaming uppercase">Live Realtime Sync</span>
+            </div>
+          </div>
+
+          <!-- 4 Core Metric Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <!-- Today's Deposits -->
+            <div class="glass-panel p-4 rounded-3xl border border-admin-border relative overflow-hidden">
+              <div class="flex items-center justify-between text-xs text-slate-400 uppercase font-bold">
+                <span>Total Deposits</span>
+                <i class="fa-solid fa-arrow-down-left text-admin-emerald"></i>
+              </div>
+              <div class="text-2xl font-black font-gaming text-admin-emerald mt-2" id="statTotalDeposits">৳ 0.00</div>
+              <span class="text-[10px] text-slate-500 font-medium">Approved transaction pool</span>
+            </div>
+
+            <!-- Today's Withdrawals -->
+            <div class="glass-panel p-4 rounded-3xl border border-admin-border relative overflow-hidden">
+              <div class="flex items-center justify-between text-xs text-slate-400 uppercase font-bold">
+                <span>Total Withdraws</span>
+                <i class="fa-solid fa-arrow-up-right text-admin-rose"></i>
+              </div>
+              <div class="text-2xl font-black font-gaming text-admin-rose mt-2" id="statTotalWithdrawals">৳ 0.00</div>
+              <span class="text-[10px] text-slate-500 font-medium">Approved cashed-out pool</span>
+            </div>
+
+            <!-- Total Users -->
+            <div class="glass-panel p-4 rounded-3xl border border-admin-border relative overflow-hidden">
+              <div class="flex items-center justify-between text-xs text-slate-400 uppercase font-bold">
+                <span>Registered Players</span>
+                <i class="fa-solid fa-users text-admin-cyan"></i>
+              </div>
+              <div class="text-2xl font-black font-gaming text-admin-cyan mt-2" id="statTotalUsers">0</div>
+              <span class="text-[10px] text-slate-500 font-medium">Total user profiles</span>
+            </div>
+
+            <!-- Active Games -->
+            <div class="glass-panel p-4 rounded-3xl border border-admin-border relative overflow-hidden">
+              <div class="flex items-center justify-between text-xs text-slate-400 uppercase font-bold">
+                <span>Live Game Arenas</span>
+                <i class="fa-solid fa-gamepad text-admin-amber"></i>
+              </div>
+              <div class="text-2xl font-black font-gaming text-admin-amber mt-2" id="statTotalGames">0</div>
+              <span class="text-[10px] text-slate-500 font-medium">Active tournament categories</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Platform Profit Calculator -->
+          <div class="glass-panel p-6 rounded-3xl border border-admin-border space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h3 class="text-base font-extrabold font-gaming uppercase tracking-wider text-slate-100 flex items-center gap-2">
+                  <i class="fa-solid fa-calculator text-admin-cyan"></i> Platform Commission & Net Profit Engine
+                </h3>
+                <p class="text-xs text-slate-400">Configure global tournament cut to calculate real net revenue</p>
+              </div>
+              <div class="bg-admin-base px-3 py-1.5 rounded-xl border border-admin-border">
+                <span class="text-xs text-slate-400 uppercase">Commission:</span>
+                <span class="text-sm font-black font-gaming text-admin-cyan ml-1" id="commissionValueDisplay">15%</span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <input type="range" id="commissionSlider" min="5" max="50" value="15" step="1" class="w-full accent-admin-cyan bg-slate-800 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[10px] font-bold text-slate-500 font-gaming uppercase">
+                <span>Min: 5% (High volume)</span>
+                <span>Balanced: 15%</span>
+                <span>Max: 50% (High Margin)</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div class="bg-admin-base/80 p-3.5 rounded-2xl border border-admin-border">
+                <span class="text-[10px] text-slate-400 uppercase font-bold">Turnover Volume</span>
+                <div class="text-lg font-black font-gaming text-slate-200 mt-0.5" id="calcTurnover">৳ 0.00</div>
+              </div>
+              <div class="bg-admin-base/80 p-3.5 rounded-2xl border border-admin-border">
+                <span class="text-[10px] text-slate-400 uppercase font-bold">Estimated House Commission</span>
+                <div class="text-lg font-black font-gaming text-admin-cyan mt-0.5" id="calcEstimatedProfit">৳ 0.00</div>
+              </div>
+              <div class="bg-admin-base/80 p-3.5 rounded-2xl border border-admin-border">
+                <span class="text-[10px] text-slate-400 uppercase font-bold">Liquidity Net Surplus</span>
+                <div class="text-lg font-black font-gaming text-admin-emerald mt-0.5" id="calcNetSurplus">৳ 0.00</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: DEPOSIT & WITHDRAWAL APPROVALS ================= -->
+        <section id="financeTab" class="tab-pane space-y-6 hidden">
+          <div>
+            <h2 class="text-xl font-black font-gaming uppercase tracking-wider text-white">Payment Operations</h2>
+            <p class="text-xs text-slate-400">Atomic verification and wallet credit authorization</p>
+          </div>
+
+          <!-- Pending Deposits Queue -->
+          <div class="glass-panel rounded-3xl p-5 border border-admin-border space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-extrabold font-gaming uppercase tracking-wider text-admin-emerald flex items-center gap-2">
+                <i class="fa-solid fa-circle-down"></i> Pending Deposits Queue
+              </h3>
+              <span id="pendingDepositsCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-admin-emerald/20 text-admin-emerald border border-admin-emerald/30">0 Requests</span>
+            </div>
+
+            <div class="overflow-x-auto no-scrollbar">
+              <table class="w-full text-left text-xs">
+                <thead class="text-[10px] font-bold text-slate-400 uppercase border-b border-admin-border">
+                  <tr>
+                    <th class="py-2.5 px-3">Player / UID</th>
+                    <th class="py-2.5 px-3">Method</th>
+                    <th class="py-2.5 px-3">Amount</th>
+                    <th class="py-2.5 px-3">Sender Phone</th>
+                    <th class="py-2.5 px-3">TrxID</th>
+                    <th class="py-2.5 px-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="depositsTableBody" class="divide-y divide-admin-border/60">
+                  <tr><td colspan="6" class="py-4 text-center text-slate-500">No pending deposits found.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pending Withdrawals Queue -->
+          <div class="glass-panel rounded-3xl p-5 border border-admin-border space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-extrabold font-gaming uppercase tracking-wider text-admin-rose flex items-center gap-2">
+                <i class="fa-solid fa-circle-up"></i> Pending Withdrawals Queue
+              </h3>
+              <span id="pendingWithdrawalsCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-admin-rose/20 text-admin-rose border border-admin-rose/30">0 Requests</span>
+            </div>
+
+            <div class="overflow-x-auto no-scrollbar">
+              <table class="w-full text-left text-xs">
+                <thead class="text-[10px] font-bold text-slate-400 uppercase border-b border-admin-border">
+                  <tr>
+                    <th class="py-2.5 px-3">Player / UID</th>
+                    <th class="py-2.5 px-3">Gateway</th>
+                    <th class="py-2.5 px-3">Amount</th>
+                    <th class="py-2.5 px-3">Account Number</th>
+                    <th class="py-2.5 px-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="withdrawalsTableBody" class="divide-y divide-admin-border/60">
+                  <tr><td colspan="5" class="py-4 text-center text-slate-500">No pending withdrawals found.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: USER & WALLET CONTROL ================= -->
+        <section id="usersTab" class="tab-pane space-y-6 hidden">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 class="text-xl font-black font-gaming uppercase tracking-wider text-white">Registered Player Directory</h2>
+              <p class="text-xs text-slate-400">Search profiles, manually calibrate balances, enforce bans, or appoint sub-admins</p>
+            </div>
+            <button id="openAppointSubAdminBtn" class="px-3.5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-300 font-bold font-gaming uppercase tracking-wider text-xs hover:bg-purple-600 hover:text-white transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-user-shield"></i> Appoint Sub-Admin
+            </button>
+          </div>
+
+          <!-- User Search Bar -->
+          <div class="glass-panel p-3 rounded-2xl border border-admin-border flex items-center gap-3">
+            <i class="fa-solid fa-magnifying-glass text-slate-500 pl-2"></i>
+            <input type="text" id="userSearchInput" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none placeholder-slate-500" placeholder="Search by name, email, phone number, or UID...">
+          </div>
+
+          <!-- Users Table -->
+          <div class="glass-panel rounded-3xl border border-admin-border overflow-hidden">
+            <div class="overflow-x-auto no-scrollbar">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-admin-base text-[10px] font-bold text-slate-400 uppercase border-b border-admin-border">
+                  <tr>
+                    <th class="py-3 px-4">Player</th>
+                    <th class="py-3 px-4">UID</th>
+                    <th class="py-3 px-4">Total Balance</th>
+                    <th class="py-3 px-4">Deposit / Winning</th>
+                    <th class="py-3 px-4">Role</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody" class="divide-y divide-admin-border/60">
+                  <tr><td colspan="7" class="py-6 text-center text-slate-500">Loading user database...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: DYNAMIC GAME MANAGER ================= -->
+        <section id="gamesTab" class="tab-pane space-y-6 hidden">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 class="text-xl font-black font-gaming uppercase tracking-wider text-white">Dynamic Game Arena Manager</h2>
+              <p class="text-xs text-slate-400">Add or configure games and custom match fee/prize pools live</p>
+            </div>
+            <button id="openAddGameModalBtn" class="px-4 py-2 bg-gradient-to-r from-admin-cyan to-teal-500 text-slate-950 font-black font-gaming uppercase tracking-wider text-xs rounded-xl shadow-md glow-border-cyan flex items-center gap-1.5">
+              <i class="fa-solid fa-plus"></i> Add New Game
+            </button>
+          </div>
+
+          <!-- Games List Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="adminGamesContainer">
+            <!-- Game cards with pools injected dynamically -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: BANNER SLIDER MANAGER ================= -->
+        <section id="bannersTab" class="tab-pane space-y-6 hidden">
+          <div>
+            <h2 class="text-xl font-black font-gaming uppercase tracking-wider text-white">Dynamic Banner & Slider Manager</h2>
+            <p class="text-xs text-slate-400">Configure 16:9 promotion banners and link redirections in real-time</p>
+          </div>
+
+          <!-- Add Banner Form -->
+          <div class="glass-panel rounded-3xl p-5 border border-admin-border space-y-4">
+            <h3 class="text-sm font-bold font-gaming uppercase tracking-wider text-admin-cyan flex items-center gap-2">
+              <i class="fa-solid fa-plus-circle"></i> Create New Carousel Banner
+            </h3>
+
+            <form id="addBannerForm" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">Banner Title</label>
+                <input type="text" id="bannerTitleInput" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="Mega Tournament Cup">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">Image URL (16:9)</label>
+                <input type="url" id="bannerImageUrlInput" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="https://image-url.com/poster.jpg">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">Action Link (Telegram/YT)</label>
+                <input type="url" id="bannerActionUrlInput" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="https://t.me/channel">
+              </div>
+
+              <div class="sm:col-span-3">
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-admin-cyan to-admin-emerald text-slate-950 font-black font-gaming uppercase tracking-wider text-xs rounded-xl shadow-md glow-border-cyan">
+                  Publish Banner To Live App
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Active Banners List -->
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold font-gaming uppercase tracking-wider text-slate-300">Active Live Banners</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="activeBannersGrid">
+              <!-- Banners rendered here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 6: GLOBAL SETTINGS & BRANDING ================= -->
+        <section id="settingsTab" class="tab-pane space-y-6 hidden">
+          <div>
+            <h2 class="text-xl font-black font-gaming uppercase tracking-wider text-white">Platform Settings & Branding</h2>
+            <p class="text-xs text-slate-400">Control gateway payment numbers, official links, and emergency maintenance lock</p>
+          </div>
+
+          <form id="globalSettingsForm" class="glass-panel p-6 rounded-3xl border border-admin-border space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- App Name -->
+              <div>
+                <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">Global App Title</label>
+                <input type="text" id="settingAppName" class="w-full px-3.5 py-2.5 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="Ludo Arena Pro">
+              </div>
+
+              <!-- Support Telegram Link -->
+              <div>
+                <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">Telegram Community / Channel</label>
+                <input type="text" id="settingTelegramUrl" class="w-full px-3.5 py-2.5 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="https://t.me/official">
+              </div>
+
+              <!-- bKash Merchant / Personal -->
+              <div>
+                <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">bKash Payment Number</label>
+                <input type="text" id="settingBkash" class="w-full px-3.5 py-2.5 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="01XXXXXXXXX">
+              </div>
+
+              <!-- Nagad Personal -->
+              <div>
+                <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">Nagad Payment Number</label>
+                <input type="text" id="settingNagad" class="w-full px-3.5 py-2.5 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="01XXXXXXXXX">
+              </div>
+
+              <!-- Rocket Personal -->
+              <div>
+                <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">Rocket Payment Number</label>
+                <input type="text" id="settingRocket" class="w-full px-3.5 py-2.5 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="01XXXXXXXXX">
+              </div>
+
+              <!-- WhatsApp Hotline -->
+              <div>
+                <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">WhatsApp Support Number</label>
+                <input type="text" id="settingWhatsapp" class="w-full px-3.5 py-2.5 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="+8801XXXXXXXXX">
+              </div>
+            </div>
+
+            <!-- Notice Marquee -->
+            <div>
+              <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">Global Player Notice / Broadcast</label>
+              <textarea id="settingNotice" rows="2" class="w-full px-3.5 py-2 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="Important announcement shown on top of the user app..."></textarea>
+            </div>
+
+            <!-- Maintenance Mode Switch -->
+            <div class="p-4 bg-admin-base rounded-2xl border border-admin-border flex items-center justify-between">
+              <div>
+                <span class="font-bold text-xs uppercase text-slate-200 block">Emergency Maintenance Mode</span>
+                <span class="text-[10px] text-slate-500">Locks non-admin players out of tournament lobbies</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="settingMaintenance" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-admin-rose"></div>
+              </label>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-admin-cyan via-teal-500 to-admin-emerald text-slate-950 font-black font-gaming uppercase tracking-wider text-xs rounded-xl shadow-md glow-border-cyan">
+              Save Global Configuration
+            </button>
+          </form>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: BALANCE ADJUSTMENT ================= -->
+  <div id="balanceModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-5 border border-admin-border shadow-2xl relative">
+      <button id="closeBalanceModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div class="text-center mb-4">
+        <h3 class="text-base font-black font-gaming uppercase tracking-wider text-admin-cyan">Adjust Player Balance</h3>
+        <p class="text-xs text-slate-400 truncate mt-0.5" id="balanceModalUserTag">UID</p>
+      </div>
+
+      <form id="balanceAdjustForm" class="space-y-3">
+        <input type="hidden" id="balanceTargetUid">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Target Balance Bucket</label>
+          <select id="balanceBucketSelect" class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none">
+            <option value="depositBalance">Deposit Balance (Refunds/Bonus)</option>
+            <option value="winningBalance">Winning Balance (Tournament Wins)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Action Type</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2 bg-admin-base rounded-xl border border-admin-border cursor-pointer">
+              <input type="radio" name="balanceActionType" value="add" checked class="accent-admin-emerald">
+              <span class="text-xs font-bold text-admin-emerald">+ Credit</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-admin-base rounded-xl border border-admin-border cursor-pointer">
+              <input type="radio" name="balanceActionType" value="deduct" class="accent-admin-rose">
+              <span class="text-xs font-bold text-admin-rose">- Deduct</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Adjustment Amount (৳)</label>
+          <input type="number" id="balanceAmountInput" min="1" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs focus:outline-none focus:border-admin-cyan" placeholder="e.g. 100">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-admin-cyan text-slate-950 font-bold font-gaming uppercase tracking-wider text-xs rounded-xl hover:bg-cyan-400">
+          Apply Balance Mutation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD GAME ================= -->
+  <div id="addGameModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-5 border border-admin-border shadow-2xl relative">
+      <button id="closeAddGameModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-base font-black font-gaming uppercase tracking-wider text-admin-cyan mb-3">Add Tournament Game</h3>
+
+      <form id="addGameForm" class="space-y-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Game Title</label>
+          <input type="text" id="newGameTitle" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs" placeholder="e.g. Ludo Pro Striker">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Category / Tag</label>
+          <input type="text" id="newGameCategory" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs" placeholder="e.g. Classic Board">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">HD Thumbnail Image URL</label>
+          <input type="url" id="newGamePoster" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs" placeholder="https://image-url.com/poster.jpg">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-admin-cyan text-slate-950 font-bold font-gaming uppercase tracking-wider text-xs rounded-xl hover:bg-cyan-400">
+          Create Game Arena
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD POOL TO GAME ================= -->
+  <div id="addPoolModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-5 border border-admin-border shadow-2xl relative">
+      <button id="closeAddPoolModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-base font-black font-gaming uppercase tracking-wider text-admin-emerald mb-3">Add Match Pool Tier</h3>
+
+      <form id="addPoolForm" class="space-y-3">
+        <input type="hidden" id="targetGameIdForPool">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Entry Fee (৳)</label>
+          <input type="number" id="newPoolFee" min="5" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs" placeholder="e.g. 50">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prize Pool (৳)</label>
+          <input type="number" id="newPoolPrize" min="9" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs" placeholder="e.g. 90">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Max Players</label>
+          <select id="newPoolMaxPlayers" class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs">
+            <option value="2">2 Players (1 vs 1)</option>
+            <option value="4">4 Players Knockout</option>
+          </select>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-admin-emerald text-slate-950 font-bold font-gaming uppercase tracking-wider text-xs rounded-xl hover:bg-emerald-400">
+          Add Pool To Game
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: APPOINT SUB-ADMIN ================= -->
+  <div id="appointModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-5 border border-admin-border shadow-2xl relative">
+      <button id="closeAppointModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-base font-black font-gaming uppercase tracking-wider text-purple-400 mb-2">Role Management</h3>
+      <p class="text-xs text-slate-400 mb-4">Grant or revoke Super Admin privileges by User ID (UID).</p>
+
+      <form id="appointAdminForm" class="space-y-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Target Player UID</label>
+          <input type="text" id="appointUidInput" required class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs font-mono" placeholder="Enter complete user UID">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role Assignment</label>
+          <select id="appointRoleSelect" class="w-full px-3 py-2 bg-admin-base border border-admin-border rounded-xl text-xs">
+            <option value="admin">Super Admin / Sub-Admin</option>
+            <option value="player">Standard Player (Revoke)</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-purple-600 text-white font-bold font-gaming uppercase tracking-wider text-xs rounded-xl hover:bg-purple-500">
+          Commit Role Mutation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= FIREBASE V10 SDK INITIALIZATION ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      setPersistence,
+      browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      updateDoc, 
+      collection, 
+      onSnapshot, 
+      query, 
+      where, 
+      deleteDoc, 
+      runTransaction, 
+      serverTimestamp, 
+      increment 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- Official Config ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUXYAa5zhNgAQb0rZXoMkA4U4NgxFfxx8",
+      authDomain: "ludo-tournament-2b6f4.firebaseapp.com",
+      databaseURL: "https://ludo-tournament-2b6f4-default-rtdb.firebaseio.com",
+      projectId: "ludo-tournament-2b6f4",
+      storageBucket: "ludo-tournament-2b6f4.firebasestorage.app",
+      messagingSenderId: "542615054488",
+      appId: "1:542615054488:web:1779d7eb9f24da1c7048ed",
+      measurementId: "G-LW578PXMHE"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+    // State Store
+    const STATE = {
+      adminUser: null,
+      users: [],
+      deposits: [],
+      withdrawals: [],
+      games: [],
+      banners: [],
+      commissionRate: 0.15
+    };
+
+    // Toast Utility
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const styles = {
+        success: 'bg-admin-emerald text-slate-950 border-emerald-400 glow-border-emerald',
+        error: 'bg-admin-rose text-white border-rose-400',
+        info: 'bg-admin-cyan text-slate-950 border-cyan-400 glow-border-cyan',
+        warning: 'bg-admin-amber text-slate-950 border-amber-400'
+      };
+      toast.className = `px-4 py-2.5 rounded-2xl border text-xs font-bold tracking-wide shadow-2xl pointer-events-auto transition-all duration-300 transform -translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('-translate-y-2', 'opacity-0'));
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function toggleLoader(show) {
+      const loader = document.getElementById('globalLoader');
+      if (show) loader.classList.remove('hidden', 'opacity-0');
+      else {
+        loader.classList.add('opacity-0');
+        setTimeout(() => loader.classList.add('hidden'), 300);
+      }
+    }
+
+    // Password visibility toggle
+    document.getElementById('toggleLoginPasswordBtn').addEventListener('click', function() {
+      const input = document.getElementById('adminPasswordInput');
+      const icon = this.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    });
+
+    // --- Authentication & Access Control ---
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    adminLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmailInput').value.trim();
+      const password = document.getElementById('adminPasswordInput').value;
+
+      toggleLoader(true);
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // Verify Role directly in Firestore
+        const userDoc = await getDoc(doc(db, "users", cred.user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+          await signOut(auth);
+          showToast("ACCESS DENIED: Credentials lack Super Admin role.", "error");
+        } else {
+          showToast("Root credentials accepted. Welcome Master.", "success");
+        }
+      } catch (err) {
+        showToast("Authentication failure: Invalid credentials.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
+      toggleLoader(true);
+      try {
+        await signOut(auth);
+        showToast("Super Admin session revoked.", "info");
+      } catch (err) {
+        showToast("Logout exception.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // Auth Observer with Strict Role Verification
+    onAuthStateChanged(auth, async (user) => {
+      toggleLoader(true);
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists() && userDoc.data().role === 'admin') {
+            STATE.adminUser = user;
+            document.getElementById('adminUserEmailDisplay').textContent = user.email;
+            document.getElementById('adminAuthView').classList.add('hidden');
+            document.getElementById('adminDashboardView').classList.remove('hidden');
+            attachRealtimeAdminListeners();
+          } else {
+            await signOut(auth);
+            STATE.adminUser = null;
+            document.getElementById('adminDashboardView').classList.add('hidden');
+            document.getElementById('adminAuthView').classList.remove('hidden');
+            showToast("Unauthorized account. Access terminated.", "error");
+          }
+        } catch (err) {
+          await signOut(auth);
+        }
+      } else {
+        STATE.adminUser = null;
+        document.getElementById('adminDashboardView').classList.add('hidden');
+        document.getElementById('adminAuthView').classList.remove('hidden');
+      }
+      toggleLoader(false);
+    });
+
+    // --- Realtime Firestore Data Synchronizers ---
+    let unsubs = [];
+    function attachRealtimeAdminListeners() {
+      // Clear old listeners
+      unsubs.forEach(u => u());
+      unsubs = [];
+
+      // 1. Listen to Users Collection
+      unsubs.push(onSnapshot(collection(db, "users"), (snap) => {
+        STATE.users = [];
+        snap.forEach(d => STATE.users.push({ id: d.id, ...d.data() }));
+        document.getElementById('statTotalUsers').textContent = STATE.users.length;
+        renderUsersTable(document.getElementById('userSearchInput').value);
+      }));
+
+      // 2. Listen to Deposits Collection
+      unsubs.push(onSnapshot(collection(db, "deposits"), (snap) => {
+        STATE.deposits = [];
+        let totalApprovedDeposits = 0;
+        let pendingCount = 0;
+
+        snap.forEach(d => {
+          const item = { id: d.id, ...d.data() };
+          STATE.deposits.push(item);
+          if (item.status === 'approved') totalApprovedDeposits += (Number(item.amount) || 0);
+          if (item.status === 'pending') pendingCount++;
+        });
+
+        document.getElementById('statTotalDeposits').textContent = `৳ ${totalApprovedDeposits.toFixed(2)}`;
+        renderDepositsTable();
+        updatePendingBadges();
+        updateProfitCalculations();
+      }));
+
+      // 3. Listen to Withdrawals Collection
+      unsubs.push(onSnapshot(collection(db, "withdrawals"), (snap) => {
+        STATE.withdrawals = [];
+        let totalApprovedWith = 0;
+        let pendingCount = 0;
+
+        snap.forEach(d => {
+          const item = { id: d.id, ...d.data() };
+          STATE.withdrawals.push(item);
+          if (item.status === 'approved') totalApprovedWith += (Number(item.amount) || 0);
+          if (item.status === 'pending') pendingCount++;
+        });
+
+        document.getElementById('statTotalWithdrawals').textContent = `৳ ${totalApprovedWith.toFixed(2)}`;
+        renderWithdrawalsTable();
+        updatePendingBadges();
+        updateProfitCalculations();
+      }));
+
+      // 4. Listen to Games Collection
+      unsubs.push(onSnapshot(collection(db, "games"), (snap) => {
+        STATE.games = [];
+        snap.forEach(d => STATE.games.push({ id: d.id, ...d.data() }));
+        document.getElementById('statTotalGames').textContent = STATE.games.length;
+        renderGamesManager();
+      }));
+
+      // 5. Listen to Banners Collection
+      unsubs.push(onSnapshot(collection(db, "banners"), (snap) => {
+        STATE.banners = [];
+        snap.forEach(d => STATE.banners.push({ id: d.id, ...d.data() }));
+        renderBannersManager();
+      }));
+
+      // 6. Listen to App Config
+      unsubs.push(onSnapshot(doc(db, "settings", "appConfig"), (snap) => {
+        if (snap.exists()) {
+          const cfg = snap.data();
+          if (cfg.appName) document.getElementById('settingAppName').value = cfg.appName;
+          if (cfg.telegram) document.getElementById('settingTelegramUrl').value = cfg.telegram;
+          if (cfg.bkash) document.getElementById('settingBkash').value = cfg.bkash;
+          if (cfg.nagad) document.getElementById('settingNagad').value = cfg.nagad;
+          if (cfg.rocket) document.getElementById('settingRocket').value = cfg.rocket;
+          if (cfg.whatsapp) document.getElementById('settingWhatsapp').value = cfg.whatsapp;
+          if (cfg.notice) document.getElementById('settingNotice').value = cfg.notice;
+          document.getElementById('settingMaintenance').checked = cfg.maintenance === true;
+        }
+      }));
+    }
+
+    function updatePendingBadges() {
+      const depPending = STATE.deposits.filter(d => d.status === 'pending').length;
+      const withPending = STATE.withdrawals.filter(w => w.status === 'pending').length;
+      const totalPending = depPending + withPending;
+
+      document.getElementById('pendingDepositsCountBadge').textContent = `${depPending} Requests`;
+      document.getElementById('pendingWithdrawalsCountBadge').textContent = `${withPending} Requests`;
+
+      const badge = document.getElementById('pendingBadge');
+      if (totalPending > 0) {
+        badge.textContent = totalPending;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // --- Dynamic Profit Engine Calculations ---
+    function updateProfitCalculations() {
+      const sliderVal = Number(document.getElementById('commissionSlider').value) || 15;
+      STATE.commissionRate = sliderVal / 100;
+      document.getElementById('commissionValueDisplay').textContent = `${sliderVal}%`;
+
+      const approvedDeposits = STATE.deposits
+        .filter(d => d.status === 'approved')
+        .reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+
+      const approvedWithdrawals = STATE.withdrawals
+        .filter(w => w.status === 'approved')
+        .reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
+
+      // Algorithmic turnover & house edge
+      const estimatedTurnover = approvedDeposits;
+      const estimatedProfit = estimatedTurnover * STATE.commissionRate;
+      const netSurplus = approvedDeposits - approvedWithdrawals;
+
+      document.getElementById('calcTurnover').textContent = `৳ ${estimatedTurnover.toFixed(2)}`;
+      document.getElementById('calcEstimatedProfit').textContent = `৳ ${estimatedProfit.toFixed(2)}`;
+      document.getElementById('calcNetSurplus').textContent = `৳ ${netSurplus.toFixed(2)}`;
+    }
+    document.getElementById('commissionSlider').addEventListener('input', updateProfitCalculations);
+
+    // --- Deposits & Withdrawals Approval System ---
+    function renderDepositsTable() {
+      const tbody = document.getElementById('depositsTableBody');
+      const pending = STATE.deposits.filter(d => d.status === 'pending');
+      tbody.innerHTML = '';
+
+      if (pending.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-500">No pending deposits currently.</td></tr>';
+        return;
+      }
+
+      pending.forEach(dep => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition-colors';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <div class="font-bold text-slate-200">${dep.userName || 'Player'}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${dep.uid}</div>
+          </td>
+          <td class="py-2.5 px-3 font-bold text-admin-cyan">${dep.method || 'bKash'}</td>
+          <td class="py-2.5 px-3 font-bold font-gaming text-admin-emerald text-sm">৳ ${Number(dep.amount || 0).toFixed(2)}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-300">${dep.senderPhone || 'N/A'}</td>
+          <td class="py-2.5 px-3 font-mono text-amber-400 font-bold">${dep.trxId || 'N/A'}</td>
+          <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+            <button class="approve-dep-btn px-2.5 py-1 rounded-lg bg-admin-emerald text-slate-950 font-bold font-gaming uppercase tracking-wider text-[11px] hover:bg-emerald-400 shadow" data-id="${dep.id}">
+              Approve
+            </button>
+            <button class="reject-dep-btn px-2.5 py-1 rounded-lg bg-admin-rose text-white font-bold font-gaming uppercase tracking-wider text-[11px] hover:bg-rose-400" data-id="${dep.id}">
+              Reject
+            </button>
+          </td>
+        `;
+
+        tr.querySelector('.approve-dep-btn').addEventListener('click', () => approveDeposit(dep));
+        tr.querySelector('.reject-dep-btn').addEventListener('click', () => rejectDeposit(dep.id));
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Atomic Deposit Approval
+    async function approveDeposit(dep) {
+      if (!confirm(`Approve deposit of ৳${dep.amount} for ${dep.userName || dep.uid}? Balance will be credited instantly.`)) return;
+      toggleLoader(true);
+      try {
+        await runTransaction(db, async (transaction) => {
+          const depRef = doc(db, "deposits", dep.id);
+          const userRef = doc(db, "users", dep.uid);
+
+          const depSnap = await transaction.get(depRef);
+          if (!depSnap.exists() || depSnap.data().status !== 'pending') {
+            throw new Error("Deposit has already been verified or removed.");
+          }
+
+          transaction.update(depRef, {
+            status: "approved",
+            approvedAt: serverTimestamp(),
+            approvedBy: STATE.adminUser.uid
+          });
+
+          // Atomically increment user's balances
+          transaction.update(userRef, {
+            depositBalance: increment(Number(dep.amount)),
+            totalBalance: increment(Number(dep.amount))
+          });
+        });
+
+        showToast(`Deposit of ৳${dep.amount} approved and credited!`, "success");
+      } catch (err) {
+        showToast(`Deposit failed: ${err.message}`, "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // Reject Deposit
+    async function rejectDeposit(depId) {
+      if (!confirm("Reject this deposit request as invalid or fraudulent?")) return;
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "deposits", depId), {
+          status: "rejected",
+          rejectedAt: serverTimestamp(),
+          rejectedBy: STATE.adminUser.uid
+        });
+        showToast("Deposit marked as rejected.", "info");
+      } catch (err) {
+        showToast("Action failed.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // Render Withdrawals Table
+    function renderWithdrawalsTable() {
+      const tbody = document.getElementById('withdrawalsTableBody');
+      const pending = STATE.withdrawals.filter(w => w.status === 'pending');
+      tbody.innerHTML = '';
+
+      if (pending.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-500">No pending withdrawals currently.</td></tr>';
+        return;
+      }
+
+      pending.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition-colors';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <div class="font-bold text-slate-200">${w.userName || 'Player'}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${w.uid}</div>
+          </td>
+          <td class="py-2.5 px-3 font-bold text-purple-400">${w.method || 'bKash'}</td>
+          <td class="py-2.5 px-3 font-bold font-gaming text-admin-rose text-sm">৳ ${Number(w.amount || 0).toFixed(2)}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-300 font-bold">${w.accountNumber || 'N/A'}</td>
+          <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+            <button class="approve-with-btn px-2.5 py-1 rounded-lg bg-admin-emerald text-slate-950 font-bold font-gaming uppercase tracking-wider text-[11px] hover:bg-emerald-400 shadow" data-id="${w.id}">
+              Mark Sent & Deduct
+            </button>
+            <button class="reject-with-btn px-2.5 py-1 rounded-lg bg-admin-rose text-white font-bold font-gaming uppercase tracking-wider text-[11px] hover:bg-rose-400" data-id="${w.id}">
+              Reject
+            </button>
+          </td>
+        `;
+
+        tr.querySelector('.approve-with-btn').addEventListener('click', () => approveWithdrawal(w));
+        tr.querySelector('.reject-with-btn').addEventListener('click', () => rejectWithdrawal(w.id));
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Atomic Withdrawal Approval
+    async function approveWithdrawal(w) {
+      if (!confirm(`Confirm you transferred ৳${w.amount} to ${w.accountNumber} (${w.method})? This will deduct the user's winning balance.`)) return;
+      toggleLoader(true);
+      try {
+        await runTransaction(db, async (transaction) => {
+          const withRef = doc(db, "withdrawals", w.id);
+          const userRef = doc(db, "users", w.uid);
+
+          const withSnap = await transaction.get(withRef);
+          const userSnap = await transaction.get(userRef);
+
+          if (!withSnap.exists() || withSnap.data().status !== 'pending') {
+            throw new Error("Withdrawal already handled.");
+          }
+
+          const userData = userSnap.data();
+          const winBal = Number(userData.winningBalance) || 0;
+          const reqAmount = Number(w.amount);
+
+          if (winBal < reqAmount) {
+            throw new Error("Player balance lower than requested withdrawal amount!");
+          }
+
+          transaction.update(withRef, {
+            status: "approved",
+            processedAt: serverTimestamp(),
+            approvedBy: STATE.adminUser.uid
+          });
+
+          // Deduct from Winning Balance and Total Balance
+          transaction.update(userRef, {
+            winningBalance: increment(-reqAmount),
+            totalBalance: increment(-reqAmount)
+          });
+        });
+
+        showToast(`Withdrawal of ৳${w.amount} finalized and deducted!`, "success");
+      } catch (err) {
+        showToast(`Withdrawal Error: ${err.message}`, "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    async function rejectWithdrawal(withId) {
+      if (!confirm("Reject this withdrawal request?")) return;
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "withdrawals", withId), {
+          status: "rejected",
+          rejectedAt: serverTimestamp(),
+          rejectedBy: STATE.adminUser.uid
+        });
+        showToast("Withdrawal rejected.", "info");
+      } catch (err) {
+        showToast("Rejection failed.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // --- User Management & Wallet Control ---
+    function renderUsersTable(queryText = "") {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '';
+
+      let filtered = STATE.users;
+      if (queryText.trim()) {
+        const q = queryText.toLowerCase().trim();
+        filtered = filtered.filter(u => 
+          (u.name && u.name.toLowerCase().includes(q)) ||
+          (u.email && u.email.toLowerCase().includes(q)) ||
+          (u.phone && u.phone.includes(q)) ||
+          (u.id && u.id.includes(q))
+        );
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-500">No matching players found.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/30 transition-colors';
+        const isBanned = u.isBanned === true;
+        const total = (Number(u.totalBalance) || 0).toFixed(2);
+        const dep = (Number(u.depositBalance) || 0).toFixed(2);
+        const win = (Number(u.winningBalance) || 0).toFixed(2);
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-200">${u.name || 'Anonymous'}</div>
+            <div class="text-[10px] text-slate-500">${u.email || 'No email'} | ${u.phone || 'No phone'}</div>
+          </td>
+          <td class="py-3 px-4 font-mono text-[10px] text-slate-400 select-all">${u.id}</td>
+          <td class="py-3 px-4 font-black font-gaming text-amber-400 text-sm">৳ ${total}</td>
+          <td class="py-3 px-4 text-[11px] font-gaming">
+            <span class="text-slate-300">D: ৳${dep}</span> • <span class="text-admin-emerald font-bold">W: ৳${win}</span>
+          </td>
+          <td class="py-3 px-4">
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${u.role === 'admin' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40' : 'bg-slate-800 text-slate-400'}">
+              ${u.role || 'player'}
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${isBanned ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+              ${isBanned ? 'BANNED' : 'ACTIVE'}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+            <button class="balance-btn px-2.5 py-1 rounded-lg bg-admin-cyan/20 hover:bg-admin-cyan hover:text-slate-950 text-admin-cyan font-bold font-gaming uppercase tracking-wider text-[11px] transition-colors" data-id="${u.id}" data-name="${u.name || u.id}">
+              <i class="fa-solid fa-coins mr-1"></i> Balance
+            </button>
+            <button class="ban-btn px-2.5 py-1 rounded-lg ${isBanned ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950' : 'bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white'} font-bold font-gaming uppercase tracking-wider text-[11px] transition-colors" data-id="${u.id}" data-banned="${isBanned}">
+              ${isBanned ? 'Unban' : 'Ban'}
+            </button>
+          </td>
+        `;
+
+        tr.querySelector('.balance-btn').addEventListener('click', () => openBalanceModal(u.id, u.name || u.id));
+        tr.querySelector('.ban-btn').addEventListener('click', () => toggleBanUser(u.id, isBanned));
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('userSearchInput').addEventListener('input', (e) => {
+      renderUsersTable(e.target.value);
+    });
+
+    // Ban / Unban Toggle
+    async function toggleBanUser(uid, currentlyBanned) {
+      const nextState = !currentlyBanned;
+      if (!confirm(`Are you sure you want to ${nextState ? 'BAN' : 'UNBAN'} this player?`)) return;
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "users", uid), {
+          isBanned: nextState,
+          bannedAt: nextState ? serverTimestamp() : null
+        });
+        showToast(`User ${nextState ? 'Banned' : 'Unbanned'} successfully!`, "success");
+      } catch (err) {
+        showToast("Failed to mutate ban status.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // Manual Balance Adjust Modal
+    const balanceModal = document.getElementById('balanceModal');
+    function openBalanceModal(uid, name) {
+      document.getElementById('balanceTargetUid').value = uid;
+      document.getElementById('balanceModalUserTag').textContent = `${name} (${uid})`;
+      balanceModal.classList.remove('hidden');
+    }
+    document.getElementById('closeBalanceModalBtn').addEventListener('click', () => balanceModal.classList.add('hidden'));
+
+    document.getElementById('balanceAdjustForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uid = document.getElementById('balanceTargetUid').value;
+      const bucket = document.getElementById('balanceBucketSelect').value;
+      const action = document.querySelector('input[name="balanceActionType"]:checked').value;
+      const rawAmount = Number(document.getElementById('balanceAmountInput').value);
+
+      if (!rawAmount || rawAmount <= 0) return showToast("Enter a valid amount.", "error");
+      const multiplier = action === 'add' ? 1 : -1;
+      const diff = rawAmount * multiplier;
+
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "users", uid), {
+          [bucket]: increment(diff),
+          totalBalance: increment(diff)
+        });
+        balanceModal.classList.add('hidden');
+        document.getElementById('balanceAdjustForm').reset();
+        showToast(`Balance mutation completed: ${action === 'add' ? '+' : '-'}৳${rawAmount} to ${bucket}`, "success");
+      } catch (err) {
+        showToast("Balance mutation failed.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // Appoint Sub-Admin Modal
+    const appointModal = document.getElementById('appointModal');
+    document.getElementById('openAppointSubAdminBtn').addEventListener('click', () => appointModal.classList.remove('hidden'));
+    document.getElementById('closeAppointModalBtn').addEventListener('click', () => appointModal.classList.add('hidden'));
+
+    document.getElementById('appointAdminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const targetUid = document.getElementById('appointUidInput').value.trim();
+      const newRole = document.getElementById('appointRoleSelect').value;
+
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "users", targetUid), {
+          role: newRole,
+          roleAssignedAt: serverTimestamp()
+        });
+        appointModal.classList.add('hidden');
+        document.getElementById('appointAdminForm').reset();
+        showToast(`Player UID promoted/updated to role: ${newRole}!`, "success");
+      } catch (err) {
+        showToast("Failed to assign role. Verify UID exists.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // --- Dynamic Game Manager Engine ---
+    function renderGamesManager() {
+      const container = document.getElementById('adminGamesContainer');
+      container.innerHTML = '';
+
+      if (STATE.games.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-8 text-center text-slate-500">No dynamic game arenas added yet. Create one above!</div>';
+        return;
+      }
+
+      STATE.games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'glass-panel rounded-3xl p-5 border border-admin-border space-y-4';
+        
+        let poolsHtml = '';
+        if (Array.isArray(game.pools) && game.pools.length > 0) {
+          poolsHtml = game.pools.map((p, idx) => `
+            <div class="flex justify-between items-center bg-admin-base/80 p-2.5 rounded-xl border border-admin-border text-xs">
+              <div>
+                <span class="font-bold text-admin-cyan">Fee: ৳${p.fee}</span>
+                <span class="text-slate-400 mx-1">•</span>
+                <span class="font-bold text-admin-amber">Prize: ৳${p.prize}</span>
+                <span class="text-[10px] text-slate-500 ml-1">(${p.maxPlayers || 2}P)</span>
+              </div>
+              <button class="delete-pool-btn text-slate-500 hover:text-admin-rose p-1 transition-colors" data-game="${game.id}" data-index="${idx}">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          `).join('');
+        } else {
+          poolsHtml = '<p class="text-xs text-slate-500 py-1">No active match pools in this game.</p>';
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img src="${game.poster}" class="w-12 h-12 rounded-2xl object-cover border border-slate-700" alt="Poster">
+              <div>
+                <h4 class="font-bold font-gaming uppercase tracking-wide text-white text-base">${game.title}</h4>
+                <span class="text-[10px] text-admin-emerald uppercase font-bold tracking-wider">${game.category || 'Battle Arena'}</span>
+              </div>
+            </div>
+            <button class="delete-game-btn w-8 h-8 rounded-xl bg-admin-rose/10 hover:bg-admin-rose/20 text-admin-rose flex items-center justify-center transition-colors" data-id="${game.id}">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Match Pool Wagers</span>
+              <button class="add-pool-trigger text-xs font-bold text-admin-cyan hover:underline" data-id="${game.id}">
+                + Add Tier Pool
+              </button>
+            </div>
+            <div class="space-y-1.5">
+              ${poolsHtml}
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.delete-game-btn').addEventListener('click', () => deleteGame(game.id));
+        card.querySelector('.add-pool-trigger').addEventListener('click', () => openAddPoolModal(game.id));
+        card.querySelectorAll('.delete-pool-btn').forEach(btn => {
+          btn.addEventListener('click', () => deletePoolFromGame(btn.getAttribute('data-game'), Number(btn.getAttribute('data-index'))));
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // Add Game Modal
+    const addGameModal = document.getElementById('addGameModal');
+    document.getElementById('openAddGameModalBtn').addEventListener('click', () => addGameModal.classList.remove('hidden'));
+    document.getElementById('closeAddGameModalBtn').addEventListener('click', () => addGameModal.classList.add('hidden'));
+
+    document.getElementById('addGameForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('newGameTitle').value.trim();
+      const category = document.getElementById('newGameCategory').value.trim();
+      const poster = document.getElementById('newGamePoster').value.trim();
+
+      const gameSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      toggleLoader(true);
+      try {
+        await setDoc(doc(db, "games", gameSlug), {
+          title,
+          category,
+          poster,
+          pools: [
+            { fee: 20, prize: 36, maxPlayers: 2 },
+            { fee: 50, prize: 90, maxPlayers: 2 }
+          ],
+          createdAt: serverTimestamp()
+        });
+        addGameModal.classList.add('hidden');
+        document.getElementById('addGameForm').reset();
+        showToast("New tournament arena published live!", "success");
+      } catch (err) {
+        showToast("Failed to save game.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    async function deleteGame(gameId) {
+      if (!confirm("Delete this entire tournament game and all its active pools?")) return;
+      toggleLoader(true);
+      try {
+        await deleteDoc(doc(db, "games", gameId));
+        showToast("Game arena removed.", "info");
+      } catch (err) {
+        showToast("Error deleting game.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // Add Match Pool To Game
+    const addPoolModal = document.getElementById('addPoolModal');
+    function openAddPoolModal(gameId) {
+      document.getElementById('targetGameIdForPool').value = gameId;
+      addPoolModal.classList.remove('hidden');
+    }
+    document.getElementById('closeAddPoolModalBtn').addEventListener('click', () => addPoolModal.classList.add('hidden'));
+
+    document.getElementById('addPoolForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const gameId = document.getElementById('targetGameIdForPool').value;
+      const fee = Number(document.getElementById('newPoolFee').value);
+      const prize = Number(document.getElementById('newPoolPrize').value);
+      const maxPlayers = Number(document.getElementById('newPoolMaxPlayers').value);
+
+      const game = STATE.games.find(g => g.id === gameId);
+      if (!game) return;
+
+      const currentPools = Array.isArray(game.pools) ? [...game.pools] : [];
+      currentPools.push({ fee, prize, maxPlayers });
+
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "games", gameId), { pools: currentPools });
+        addPoolModal.classList.add('hidden');
+        document.getElementById('addPoolForm').reset();
+        showToast(`Added ৳${fee} pool to ${game.title}!`, "success");
+      } catch (err) {
+        showToast("Failed to append match pool.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    async function deletePoolFromGame(gameId, poolIndex) {
+      const game = STATE.games.find(g => g.id === gameId);
+      if (!game || !Array.isArray(game.pools)) return;
+      if (!confirm("Remove this match pool tier?")) return;
+
+      const updated = game.pools.filter((_, idx) => idx !== poolIndex);
+      toggleLoader(true);
+      try {
+        await updateDoc(doc(db, "games", gameId), { pools: updated });
+        showToast("Match pool tier removed.", "info");
+      } catch (err) {
+        showToast("Failed to delete pool.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // --- Dynamic Banner Manager ---
+    function renderBannersManager() {
+      const grid = document.getElementById('activeBannersGrid');
+      grid.innerHTML = '';
+
+      if (STATE.banners.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-6 text-center text-slate-500">No banners live. Add your first 16:9 banner above.</div>';
+        return;
+      }
+
+      STATE.banners.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'glass-panel rounded-3xl overflow-hidden border border-admin-border relative flex flex-col justify-between';
+        card.innerHTML = `
+          <div class="relative aspect-video w-full overflow-hidden">
+            <img src="${b.image}" class="w-full h-full object-cover" alt="Banner">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+            <button class="delete-banner-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-admin-rose/80 hover:bg-admin-rose text-white flex items-center justify-center text-xs transition-colors shadow-lg" data-id="${b.id}">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+          <div class="p-3">
+            <h4 class="font-bold text-xs text-white truncate">${b.title}</h4>
+            <a href="${b.url}" target="_blank" class="text-[10px] text-admin-cyan hover:underline truncate block mt-0.5">${b.url}</a>
+          </div>
+        `;
+
+        card.querySelector('.delete-banner-btn').addEventListener('click', () => deleteBanner(b.id));
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById('addBannerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('bannerTitleInput').value.trim();
+      const image = document.getElementById('bannerImageUrlInput').value.trim();
+      const url = document.getElementById('bannerActionUrlInput').value.trim();
+
+      toggleLoader(true);
+      try {
+        const bannerId = 'ban_' + Date.now();
+        await setDoc(doc(db, "banners", bannerId), {
+          title,
+          image,
+          url,
+          createdAt: serverTimestamp()
+        });
+        document.getElementById('addBannerForm').reset();
+        showToast("New dynamic carousel slide added to live user app!", "success");
+      } catch (err) {
+        showToast("Failed to save banner.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    async function deleteBanner(bannerId) {
+      if (!confirm("Delete this banner from user app?")) return;
+      toggleLoader(true);
+      try {
+        await deleteDoc(doc(db, "banners", bannerId));
+        showToast("Banner deleted.", "info");
+      } catch (err) {
+        showToast("Failed to delete banner.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    // --- Global Settings & Branding Engine ---
+    document.getElementById('globalSettingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const appName = document.getElementById('settingAppName').value.trim();
+      const telegram = document.getElementById('settingTelegramUrl').value.trim();
+      const bkash = document.getElementById('settingBkash').value.trim();
+      const nagad = document.getElementById('settingNagad').value.trim();
+      const rocket = document.getElementById('settingRocket').value.trim();
+      const whatsapp = document.getElementById('settingWhatsapp').value.trim();
+      const notice = document.getElementById('settingNotice').value.trim();
+      const maintenance = document.getElementById('settingMaintenance').checked;
+
+      toggleLoader(true);
+      try {
+        await setDoc(doc(db, "settings", "appConfig"), {
+          appName,
+          telegram,
+          bkash,
+          nagad,
+          rocket,
+          whatsapp,
+          notice,
+          maintenance,
+          updatedAt: serverTimestamp(),
+          updatedBy: STATE.adminUser.uid
+        }, { merge: true });
+
+        showToast("Global configurations pushed live to user ecosystem!", "success");
+      } catch (err) {
+        showToast("Failed to save settings.", "error");
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // --- Tab Switching Navigation Engine ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        const targetId = link.getAttribute('data-tab');
+
+        // Toggle panes
+        tabPanes.forEach(pane => pane.classList.add('hidden'));
+        document.getElementById(targetId).classList.remove('hidden');
+
+        // Style links
+        navLinks.forEach(l => {
+          l.className = 'nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all';
+        });
+        link.className = 'nav-link active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold font-gaming uppercase tracking-wider transition-all bg-admin-cyan/20 text-admin-cyan border border-admin-cyan/30';
+
+        // Close mobile drawer on selection
+        closeMobileSidebar();
+      });
+    });
+
+    // Mobile Sidebar Drawer Controls
+    function openMobileSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarBackdrop.classList.remove('hidden');
+    }
+    function closeMobileSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarBackdrop.classList.add('hidden');
+    }
+
+    document.getElementById('openMobileSidebarBtn').addEventListener('click', openMobileSidebar);
+    document.getElementById('closeMobileSidebarBtn').addEventListener('click', closeMobileSidebar);
+    sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+    document.getElementById('quickReloadBtn').addEventListener('click', () => location.reload());
+
+  </script>
+</body>
+</html>
